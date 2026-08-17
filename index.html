@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Montopan Konteyner Ev Simülatörü</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 10px; background: #0f172a; font-family: 'Segoe UI', Arial, sans-serif; color: #f1f5f9; min-height: 100vh; }
+        #app-wrapper { width: 100%; max-width: 1250px; margin: auto; background: #1e293b; padding: 10px; border-radius: 12px; box-shadow: 0 10px 35px rgba(0,0,0,0.45); }
+        #info-bar { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 7px 10px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .info-text { color: #cbd5e1; font-size: 11px; line-height: 1.4; }
+        .info-text strong { color: #38bdf8; }
+        .exit-button { background: #475569; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; transition: background 0.2s; }
+        .exit-button:hover { background: #ef4444; }
+        #visualizer-workspace { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 8px; align-items: start; }
+        #controls { display: flex; flex-direction: column; gap: 6px; }
+        .control-card { background: #0f172a; border: 1px solid #334155; border-radius: 7px; padding: 7px; }
+        .control-title { font-weight: 700; font-size: 11px; margin-bottom: 6px; color: #f8fafc; }
+        .control-row { display: flex; align-items: center; gap: 4px; }
+        input[type="file"] { display: none; }
+        .file-button { display: inline-block; padding: 5px 7px; background: #334155; border: 1px dashed #38bdf8; border-radius: 5px; color: white; cursor: pointer; font-size: 10px; }
+        .clear-button { border: none; background: #dc2626; color: white; padding: 5px 7px; border-radius: 5px; cursor: pointer; font-size: 10px; }
+        .file-name { color: #94a3b8; font-size: 9px; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .scale-row { display: flex; align-items: center; gap: 5px; margin-top: 6px; color: #94a3b8; font-size: 9px; }
+        .scale-value { color: #38bdf8; font-weight: bold; min-width: 31px; text-align: right; }
+        #stage-wrapper { position: relative; width: 100%; overflow: hidden; border-radius: 8px; border: 1px solid #334155; background: #020617; }
+        #base-house { display: block; width: 100%; height: auto; }
+        #visualizer-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+        .panel-rect { mix-blend-mode: multiply; opacity: 0.92; }
+    </style>
+</head>
+<body>
+
+<div id="app-wrapper">
+    <div id="info-bar">
+        <div class="info-text">💡 <strong>Montopan Konteyner Ev Simülatörü</strong><br>Simülasyon başarıyla tamamlandı.</div>
+        <button class="exit-button" onclick="resetSimulator()">Kapat / Sıfırla</button>
+    </div>
+
+    <div id="visualizer-workspace">
+        <div id="controls">
+            <!-- Nasıl Kullanılır Kartı -->
+            <div class="control-card">
+                <div class="control-title" style="color: #38bdf8;">📖 Nasıl Kullanılır?</div>
+                <div style="color: #cbd5e1; font-size: 10px; line-height: 1.5;">
+                    1. <strong>www.montopan.com</strong> sitemizden beğendiğiniz bir modeli bilgisayarınıza indirin.<br><br>
+                    2. <strong>Panel Seç</strong> butonundan seçtiğiniz modeli yükleyin.<br><br>
+                    3. Uygulama görünümünü inceleyin.
+                </div>
+            </div>
+
+            <div class="control-card">
+                <div class="control-title">🧱 Ön Cephe Paneli</div>
+                <div class="control-row">
+                    <label for="panel1" class="file-button">📁 Panel Seç</label>
+                    <input type="file" id="panel1" accept="image/*">
+                    <span id="name1" class="file-name">Seçilmedi</span>
+                    <button class="clear-button" onclick="clearPanel(1)">✕</button>
+                </div>
+                <div class="scale-row"><span>Ölçek</span><input type="range" id="scale1" min="50" max="300" value="125" oninput="changeScale(1)"><span id="scaleValue1" class="scale-value">125px</span></div>
+            </div>
+        </div>
+
+        <div id="stage-wrapper">
+            <img src="house_2.jpg" id="base-house" alt="Montopan Konteyner Ev">
+            <svg id="visualizer-svg" viewBox="0 0 1024 683" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="pattern1" patternUnits="userSpaceOnUse" width="125" height="125">
+                        <image id="patternImage1" href="" width="125" height="125" preserveAspectRatio="xMidYMid slice"/>
+                    </pattern>
+
+                    <mask id="maskFront" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="683">
+                        <rect x="145" y="256" width="742" height="240" fill="white"/>
+                        <rect x="238" y="288" width="139" height="147" fill="black"/> 
+                        <rect x="461" y="285" width="107" height="212" fill="black"/> 
+                        <rect x="651" y="287" width="144" height="146" fill="black"/> 
+                        <rect x="174" y="375" width="36" height="124" fill="black"/>
+                        <rect x="727" y="447" width="41" height="49" fill="black"/>
+                        <rect x="787" y="431" width="78" height="69" fill="black"/>
+                    </mask>
+                </defs>
+                
+                <rect id="overlay1" class="panel-rect" x="0" y="0" width="1024" height="683" fill="url(#pattern1)" mask="url(#maskFront)" visibility="hidden"/>
+            </svg>
+        </div>
+    </div>
+</div>
+
+<script>
+const panelData = {
+    1: { pattern: "pattern1", image: "patternImage1", overlay: "overlay1", input: "panel1", name: "name1", scale: 125 }
+};
+
+document.getElementById("panel1").addEventListener("change", function(e) {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    document.getElementById("name1").innerText = file.name;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        document.getElementById("patternImage1").setAttribute("href", evt.target.result);
+        document.getElementById("overlay1").setAttribute("visibility", "visible");
+    };
+    reader.readAsDataURL(file);
+});
+
+function changeScale(n) {
+    const val = document.getElementById("scale" + n).value;
+    panelData[n].scale = val;
+    document.getElementById("scaleValue" + n).innerText = val + "px";
+    const pat = document.getElementById(panelData[n].pattern);
+    const imgEl = document.getElementById(panelData[n].image);
+    pat.setAttribute("width", val); pat.setAttribute("height", val);
+    imgEl.setAttribute("width", val); imgEl.setAttribute("height", val);
+}
+
+function clearPanel(n) {
+    const d = panelData[n];
+    document.getElementById(d.overlay).setAttribute("visibility", "hidden");
+    document.getElementById(d.image).setAttribute("href", "");
+    document.getElementById(d.name).innerText = "Seçilmedi";
+    document.getElementById(d.input).value = "";
+}
+
+function resetSimulator() {
+    clearPanel(1);
+    window.close();
+}
+</script>
+</body>
+</html>
