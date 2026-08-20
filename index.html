@@ -75,7 +75,7 @@
 
             <div class="control-card">
                 <div class="control-title">💾 Projeyi Kaydet</div>
-                <button class="save-button" onclick="saveAs300PNG()">Tasarımı Kaydet</button>
+                <button class="save-button" onclick="saveDesign()">Tasarımı Kaydet</button>
             </div>
         </div>
 
@@ -143,7 +143,7 @@ function resetSimulator() {
     clearPanel(1);
 }
 
-function saveAs300PNG() {
+function saveDesign() {
     const imgElement = document.getElementById("base-house");
     const svgElement = document.getElementById("visualizer-svg");
 
@@ -153,8 +153,9 @@ function saveAs300PNG() {
     const svgUrl = DOMURL.createObjectURL(svgBlob);
 
     const canvas = document.createElement("canvas");
-    canvas.width = 300;
-    canvas.height = 200; 
+    // 2K Çözünürlük (2048x1366)
+    canvas.width = 2048; 
+    canvas.height = 1366; 
     const ctx = canvas.getContext("2d");
 
     const img = new Image();
@@ -167,9 +168,9 @@ function saveAs300PNG() {
             ctx.drawImage(svgImage, 0, 0, canvas.width, canvas.height);
             DOMURL.revokeObjectURL(svgUrl);
 
-            const imgURI = canvas.toDataURL("image/png");
+            const imgURI = canvas.toDataURL("image/png", 1.0);
             const link = document.createElement("a");
-            link.download = "montopan-tasarim.png";
+            link.download = "montopan-tasarim-yuksek-kalite.png";
             link.href = imgURI;
             link.click();
         };
